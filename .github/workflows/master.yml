@@ -22,7 +22,7 @@ jobs:
           chmod 644 ~/.ssh/known_hosts
           
       - name: Kill Process
-        run: sshpass -f ~/.ssh/password ssh root@109.123.252.229 'pkill -o TelegramBotFileManager'
+        run: sshpass -f ~/.ssh/password ssh root@109.123.252.229 'pkill -f TelegramBotFileManager'
 
       - name: Publish Application
         run: sudo dotnet publish --configuration Release --output ./publish --self-contained true -r linux-x64 /p:PublishSingleFile=true
@@ -32,4 +32,4 @@ jobs:
 
       - name: Start Application
         run: |
-          sshpass -f ~/.ssh/password ssh root@109.123.252.229 'screen -d -m -S TelegramManager bash -c "cd /root/TelegramBotFileManager && chmod +x TelegramBotFileManager && ./TelegramBotFileManager"'
+          sshpass -f ~/.ssh/password ssh root@109.123.252.229 'screen -X -S TelegramManager quit;screen -d -m -S TelegramManager bash -c "cd /root/TelegramBotFileManager && chmod +x TelegramBotFileManager && ./TelegramBotFileManager"'
