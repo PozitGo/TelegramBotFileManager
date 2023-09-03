@@ -24,6 +24,9 @@ jobs:
       - name: Kill Process
         run: sshpass -f ~/.ssh/password ssh root@109.123.252.229 'pkill -f TelegramBotFileManager' || true
 
+      - name: Delete Screen
+        run: sshpass -f ~/.ssh/password ssh root@109.123.252.229 'screen -X -S TelegramManager quit' || true
+
       - name: Publish Application
         run: sudo dotnet publish --configuration Release --output ./publish --self-contained true -r linux-x64 /p:PublishSingleFile=true
 
