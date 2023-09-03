@@ -1,0 +1,32 @@
+name: Publish C# Application
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PASSWORD }}" > ~/.ssh/password
+          chmod 600 ~/.ssh/password
+          ssh-keyscan 109.123.252.229 >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Publish Application
+        run: sudo dotnet publish --configuration Release --output ./publish --self-contained true -r linux-x64 /p:PublishSingleFile=true
+
+      - name: Transfer Files to SSH Server
+        run: sshpass -f ~/.ssh/password scp -r ./publish/* root@109.123.252.229:/root/TelegramBotFileManager
+
+      - name: Start Application
+        run: |
+          sshpass -f ~/.ssh/password ssh root@109.123.252.229 'screen -d -m -S TelegramManager bash -c "cd /root/TelegramBotFileManager && chmod +x TelegramBotFileManager && ./TelegramBotFileManager"'
