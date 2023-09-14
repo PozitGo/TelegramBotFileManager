@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using TelegramBotFilesManager.Model;
@@ -9,6 +8,7 @@ namespace TelegramBotFilesManager.Command
     public class AddCommand : ICommand
     {
         private PhotoSize[] photo;
+        private Document document;
         private TelegramBotClient botClient;
         private HttpClient client;
         private const string URI = "https://syntaxjuggler.com/api/files/upload";
@@ -17,14 +17,34 @@ namespace TelegramBotFilesManager.Command
             this.photo = photo;
             this.botClient = botClient;
             this.client = new();
+            this.photo = null!;
+        }
+
+        public AddCommand(Document document, TelegramBotClient botClient)
+        {
+            this.document = document;
+            this.botClient = botClient;
+            this.client = new();
+            this.photo = null!;
         }
 
         public async Task Execute(Update update)
         {
             try
             {
-                var fileId = update.Message!.Photo!.Last().FileId;
-                var fileInfo = await botClient.GetFileAsync(fileId);
+
+                FileBase fileId = null!;
+                if (photo != null)
+                {
+                    fileId!.FileId = update.Message!.Photo!.Last().FileId;
+                }
+                else
+                {
+                    fileId!.FileId = update.Message!.Document!.FileId;
+
+                }
+
+                var fileInfo = await botClient.GetFileAsync(fileId!.FileId);
 
                 using var photoStream = new MemoryStream();
                 await botClient.DownloadFileAsync(fileInfo.FilePath!, photoStream);
@@ -44,7 +64,7 @@ namespace TelegramBotFilesManager.Command
                         chatId: update?.Message?.Chat.Id!,
                         text: $"Файл успешно отправлен, конечная точка полученной картинки https://syntaxjuggler.com/api/files/display/{JsonConvert.DeserializeObject<APIResponse>(responseContent)!.Data}");
 
-                  await Task.Delay(1000);
+                    await Task.Delay(1000);
                 }
                 else
                 {

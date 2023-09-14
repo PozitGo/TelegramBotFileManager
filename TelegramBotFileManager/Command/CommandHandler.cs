@@ -20,9 +20,16 @@ namespace TelegramBotFilesManager.Command
         public async Task<ICommand> GetCommandHandler(TelegramBotClient botClient)
         {
             var message = update.Message;
-            if(message?.Photo != null && message.Photo.Length > 0)
-            {   
+
+            if (message?.Photo != null && message.Photo.Length > 0)
+            {
+                // Если отправлены фотографии, создаем команду для их обработки
                 return new AddCommand(message.Photo, botClient);
+            }
+            else if (message?.Document != null)
+            {
+                // Если отправлен документ, можно также его обработать
+                return new AddCommand(message.Document, botClient);
             }
             else if (message?.Text != null)
             {
@@ -30,29 +37,30 @@ namespace TelegramBotFilesManager.Command
                 {
                     return new DeleteCommand(message.Text.Split(" ")[1].ToLower(), botClient);
                 }
-                else if (message?.Text.Split(" ")[0].ToLower() == "info")
+                else if (message.Text.Split(" ")[0].ToLower() == "info")
                 {
                     return new GetFileNameCommad(botClient, message.Text.Split(" ")[1].ToLower());
                 }
-                else if (message?.Text?.ToLower() == "list")
+                else if (message.Text.ToLower() == "list")
                 {
                     return new GetCommad(botClient);
                 }
                 else
                 {
                     await botClient.SendTextMessageAsync(
-                    chatId: update?.Message?.Chat.Id!,
-                    text: $"Команда не найдена");
+                        chatId: update?.Message?.Chat.Id!,
+                        text: $"Команда не найдена");
                     return null!;
                 }
             }
             else
             {
                 await botClient.SendTextMessageAsync(
-                chatId: update?.Message?.Chat.Id!,
-                text: $"Команда не найдена");
+                    chatId: update?.Message?.Chat.Id!,
+                    text: $"Команда не найдена");
                 return null!;
             }
         }
+
     }
 }
