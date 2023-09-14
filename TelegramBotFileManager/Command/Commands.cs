@@ -33,13 +33,15 @@ namespace TelegramBotFilesManager.Command
             try
             {
 
-                FileBase fileId = null!;
+                FileBase fileId = null;
                 if (photo != null)
                 {
+                    fileId = update.Message!.Photo!.Last();
                     fileId!.FileId = update.Message!.Photo!.Last().FileId;
                 }
                 else
                 {
+                    fileId = update.Message!.Document!;
                     fileId!.FileId = update.Message!.Document!.FileId;
 
                 }
